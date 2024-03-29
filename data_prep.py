@@ -31,20 +31,20 @@ def fill_nan_with_ml(df: pd.DataFrame, target: str, features: list) -> pd.DataFr
     return df
 
 def datatype_cleanup(df: pd.DataFrame) -> pd.DataFrame:
-
+    df_cp = df.copy(deep=True)
     # List of columns to fill NaN and convert to int
     columns = ['INCM_TYP', 'CASATD_CNT', 'PC', 'MTHTD','Asset value','MTHCASA','UT_AVE','N_FUNDS', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_AVE', 'MIN_MTH_TRN_AMT','MAX_MTH_TRN_AMT','CC_LMT','HL_tag','AL_tag','pur_price_avg']
 
     # Apply fillna and astype to each column
-    df[columns] = df[columns].fillna(0).astype(int)
+    df_cp[columns] = df_cp[columns].fillna(0).astype(int)
 
     # Convert C_seg to numerical value using Label Encoding
-    df['C_seg'] = df['C_seg'].astype('category').cat.codes #0 =Affluent, 1 = Normal
+    df_cp['C_seg'] = df_cp['C_seg'].astype('category').cat.codes #0 =Affluent, 1 = Normal
 
-    return df
+    return df_cp
 
 def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
-
+    df_cp= df.copy(deep=True)
     # def calculate_casastd_cnt_unq(row):
     #     """
     #     Calculates the unique count of CASATD_CNT based on the given row.
@@ -67,19 +67,19 @@ def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
     #     else:
     #         return 2
 
-    # df['CASASTD_CNT_UNQ'] = df.apply(calculate_casastd_cnt_unq, axis=1)
+    # df_cp['CASASTD_CNT_UNQ'] = df_cp.apply(calculate_casastd_cnt_unq, axis=1)
     # # df[['C_ID', 'CASATD_CNT', 'NUM_PRD', 'CASASTD_CNT_UNQ']].head()
 
     # if MAXTD or MTHTD have some value create new column with name IS_TD with value 1 else 0
-    df['IS_TD'] = np.where((df['MAXTD'].notnull() | df['MTHTD'].notnull()), 1, 0)
+    df_cp['IS_TD'] = np.where((df_cp['MAXTD'].notnull() | df_cp['MTHTD'].notnull()), 1, 0)
     # df[['C_ID', 'CASATD_CNT', 'NUM_PRD','MTHTD','MAXTD' ,'IS_TD']].head()
 
     # if MTHCASA or MAXCASA have some value create new column with name IS_CASA with value 1 else 0
-    df['IS_CASA'] = np.where((df['MTHCASA'].notnull() | df['MAXCASA'].notnull()), 1, 0)
+    df_cp['IS_CASA'] = np.where((df_cp['MTHCASA'].notnull() | df_cp['MAXCASA'].notnull()), 1, 0)
     # df[['C_ID', 'CASATD_CNT', 'NUM_PRD','MTHCASA','MAXCASA' ,'IS_CASA']].head()
 
     # if N_FUNDS or MAXUT have some count then create new column with name IS_FUNDS with value 1 else 0
-    df['IS_FUNDS'] = np.where((df['N_FUNDS'].notnull() | df['MAXUT'].notnull()), 1, 0)
+    df_cp['IS_FUNDS'] = np.where((df_cp['N_FUNDS'].notnull() | df_cp['MAXUT'].notnull()), 1, 0)
     # df[['C_ID','NUM_PRD','UT_AVE','N_FUNDS','MAXUT' ,'IS_FUNDS']].head()
 
     # IF CC_CHECK is 1 it means these records customer who don't have any outstanding balancec every month, so regular payee
@@ -88,17 +88,17 @@ def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
     # df[(df['CC_AVE'].isnull()| df['CC_AVE']==0) & (df['MAX_MTH_TRN_AMT'] + df['MIN_MTH_TRN_AMT']+ df['AVG_TRN_AMT']+ df['ANN_TRN_AMT']+ df['ANN_N_TRX']+ df['CC_LMT']) > 0][['CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT','CC_CHECK']].head()
 
     # change NaN to 0 for these columns 'CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT'
-    df[['CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT']] = df[['CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT']].fillna(0)
+    df_cp[['CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT']] = df_cp[['CC_AVE','MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT']].fillna(0)
 
     # if sum of above columns is 0 or NULL then create new column with name IS_CC_ZERO with value o else 1
-    df['IS_CC'] = np.where(((df['CC_AVE'] + df['MAX_MTH_TRN_AMT'] + df['MIN_MTH_TRN_AMT'] + df['AVG_TRN_AMT'] + df['ANN_TRN_AMT'] + df['ANN_N_TRX'] + df['CC_LMT']).isnull() | (df['CC_AVE'] + df['MAX_MTH_TRN_AMT'] + df['MIN_MTH_TRN_AMT'] + df['AVG_TRN_AMT'] + df['ANN_TRN_AMT'] + df['ANN_N_TRX'] + df['CC_LMT'])==0), 0, 1)
+    df_cp['IS_CC'] = np.where(((df_cp['CC_AVE'] + df_cp['MAX_MTH_TRN_AMT'] + df_cp['MIN_MTH_TRN_AMT'] + df_cp['AVG_TRN_AMT'] + df_cp['ANN_TRN_AMT'] + df_cp['ANN_N_TRX'] + df_cp['CC_LMT']).isnull() | (df_cp['CC_AVE'] + df_cp['MAX_MTH_TRN_AMT'] + df_cp['MIN_MTH_TRN_AMT'] + df_cp['AVG_TRN_AMT'] + df_cp['ANN_TRN_AMT'] + df_cp['ANN_N_TRX'] + df_cp['CC_LMT'])==0), 0, 1)
     # df[['C_ID', 'CC_AVE', 'MAX_MTH_TRN_AMT', 'MIN_MTH_TRN_AMT', 'AVG_TRN_AMT', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_LMT', 'IS_CC', 'CC_CHECK']].head()
 
-    df['IS_LOAN']= np.where((df['HL_tag'] + df['AL_tag'])>0, 1, 0)  
+    df_cp['IS_LOAN']= np.where((df_cp['HL_tag'] + df_cp['AL_tag'])>0, 1, 0)  
 
     # show records where (df['HL_tag'] + df['AL_tag'])>1 
     # df[(df['HL_tag'] + df['AL_tag'])>1][['C_ID','HL_tag','AL_tag','IS_LOAN']].head()
-    return df
+    return df_cp[['IS_TD','IS_CASA','IS_FUNDS','IS_CC','IS_LOAN']]
 
 ####--------------------------------------####
 
