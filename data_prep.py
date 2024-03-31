@@ -33,7 +33,7 @@ def fill_nan_with_ml(df: pd.DataFrame, target: str, features: list) -> pd.DataFr
 def datatype_cleanup(df: pd.DataFrame) -> pd.DataFrame:
     df_cp = df.copy(deep=True)
     # List of columns to fill NaN and convert to int
-    columns = ['INCM_TYP', 'CASATD_CNT', 'PC', 'MTHTD','Asset value','MTHCASA','UT_AVE','N_FUNDS', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_AVE', 'MIN_MTH_TRN_AMT','MAX_MTH_TRN_AMT','CC_LMT','HL_tag','AL_tag','pur_price_avg']
+    columns = ['INCM_TYP', 'CASATD_CNT', 'PC', 'MTHTD','Asset value','MTHCASA','UT_AVE','N_FUNDS', 'ANN_TRN_AMT', 'ANN_N_TRX', 'CC_AVE', 'MIN_MTH_TRN_AMT','MAX_MTH_TRN_AMT','CC_LMT','HL_tag','AL_tag','pur_price_avg','AVG_TRN_AMT','DRvCR']
 
     # Apply fillna and astype to each column
     df_cp[columns] = df_cp[columns].fillna(0).astype(int)
