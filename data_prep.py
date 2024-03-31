@@ -100,7 +100,7 @@ def create_product_features(df: pd.DataFrame) -> pd.DataFrame:
     # df[(df['HL_tag'] + df['AL_tag'])>1][['C_ID','HL_tag','AL_tag','IS_LOAN']].head()
     return df_cp[['IS_TD','IS_CASA','IS_FUNDS','IS_CC','IS_LOAN']]
 
-####--------------------------------------####
+####------------ Additional code not used as part of assessment --------------------------####
 
 # Derive more features
 def derive_features(df: pd.DataFrame) -> pd.DataFrame:
